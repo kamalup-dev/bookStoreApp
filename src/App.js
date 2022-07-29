@@ -1,24 +1,51 @@
-import logo from './logo.svg';
-import './App.css';
+import Cart from "./components/Cart/Cart";
+import Layout from "./components/Layout/Layout";
+import Products from "./components/Shop/Products";
+import Notification from "./components/UI/Notification";
+
+import { sendCartData, receiveCartData } from "./components/store/cart-actions";
+
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+
+let isTrue = true
 
 function App() {
+  const dispatch = useDispatch();
+
+  const isVisible = useSelector((state) => state.ui.isVisible);
+  const cart = useSelector((state) => state.cart);
+  const isNotification = useSelector((state) => state.ui.notification);
+
+  useEffect(() => {
+    dispatch(receiveCartData())
+  },[dispatch]) //react guarentees that this function never changes so It's just here for the sake of completeness
+
+  useEffect(() => {
+
+    if(isTrue){
+      isTrue = false;
+      return;
+    }
+
+    if(cart.changed) dispatch(sendCartData(cart))
+
+  }, [cart, dispatch]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      {isNotification && (
+        <Notification
+          status={isNotification.status}
+          title={isNotification.title}
+          message={isNotification.message}
+        />
+      )}
+      <Layout>
+        {isVisible && <Cart />}
+        <Products />
+      </Layout>
+    </>
   );
 }
 
